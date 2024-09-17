@@ -167,7 +167,7 @@ class LightingLairdWebSocketServer:
         #    self.server = testSock
         #   print(f"Connected: {testSock.open}")
 
-        testSock = await websockets.client.connect(f"ws://{self.host}/ws")
+        testSock = await websockets.connect(f"ws://{self.host}/ws")
         await testSock.send("ping")
         message = await testSock.recv()
         self.server = testSock
