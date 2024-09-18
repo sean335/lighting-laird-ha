@@ -163,12 +163,12 @@ class LightingLairdWebSocketServer:
 
     async def start_server(self):
 
-        #testSock = await websockets.connect(f"ws://{self.host}/ws")
-        #await testSock.send("ping")
-        #message = await testSock.recv()
-        #self.server = testSock
+        testSock = await websockets.connect(f"ws://{self.host}/ws")
+        await testSock.send("ping")
+        message = await testSock.recv()
+        self.server = testSock
 
-        while True:
+'''        while True:
             try:
                 # Attempt to establish the connection
                 testSock = await websockets.connect(f"ws://{self.host}/ws")
@@ -192,7 +192,7 @@ class LightingLairdWebSocketServer:
             except Exception as e:
                 print(f"An error occurred: {e}. Reconnecting in 5 seconds...")
                 time.sleep(5)  # Wait before retrying
-
+'''
 
     # print(f"Received: {message}")
 
