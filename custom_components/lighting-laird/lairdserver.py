@@ -183,9 +183,7 @@ class LightingLairdWebSocketServer:
                 # Optionally continue handling communication here...
                 # Keep the connection open
                 while True:
-                    # Example of receiving messages in a loop
-                    message = await testSock.recv()
-                    print(f"Received message: {message}")
+                    
 
             except (websockets.ConnectionClosedError, websockets.ConnectionClosedOK) as e:
                 print(f"Connection lost: {e}. Reconnecting in 5 seconds...")
