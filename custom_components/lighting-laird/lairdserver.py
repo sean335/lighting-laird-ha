@@ -183,7 +183,7 @@ class LightingLairdWebSocketServer:
                 # Optionally continue handling communication here...
                 # Keep the connection open
                 while True:
-                    
+                    pass
 
             except (websockets.ConnectionClosedError, websockets.ConnectionClosedOK) as e:
                 print(f"Connection lost: {e}. Reconnecting in 5 seconds...")
