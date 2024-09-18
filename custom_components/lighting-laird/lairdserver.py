@@ -161,16 +161,39 @@ class LightingLairdWebSocketServer:
         await asyncio.gather(self.consumer_handler(websocket))
 
     async def start_server(self):
-        # async for testSock in websockets.connect(f"ws://{self.host}/ws"):
-        # await testSock.send("ping")
-        # message = await testSock.recv()
-        #    self.server = testSock
-        #   print(f"Connected: {testSock.open}")
 
-        testSock = await websockets.connect(f"ws://{self.host}/ws")
-        await testSock.send("ping")
-        message = await testSock.recv()
-        self.server = testSock
+        #testSock = await websockets.connect(f"ws://{self.host}/ws")
+        #await testSock.send("ping")
+        #message = await testSock.recv()
+        #self.server = testSock
+
+        while True:
+            try:
+                # Attempt to establish the connection
+                testSock = await websockets.connect(f"ws://{self.host}/ws")
+                self.server = testSock
+                print("Connected to the WebSocket")
+                
+                # Example of sending and receiving a message
+                await testSock.send("ping")
+                message = await testSock.recv()
+                print(f"Received message: {message}")
+                
+                # Optionally continue handling communication here...
+                # Keep the connection open
+                while True:
+                    # Example of receiving messages in a loop
+                    message = await testSock.recv()
+                    print(f"Received message: {message}")
+
+            except (websockets.ConnectionClosedError, websockets.ConnectionClosedOK) as e:
+                print(f"Connection lost: {e}. Reconnecting in 5 seconds...")
+                time.sleep(5)  # Wait before retrying
+
+            except Exception as e:
+                print(f"An error occurred: {e}. Reconnecting in 5 seconds...")
+                time.sleep(5)  # Wait before retrying
+
 
     # print(f"Received: {message}")
 
