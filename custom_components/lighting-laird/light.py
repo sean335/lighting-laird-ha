@@ -116,11 +116,11 @@ async def async_setup_entry(
     if my_lights is not None:
         print(f"Got Lights: {my_lights}")
         for light in my_lights:
-            if light.get("dimmable") != 0:
+            if light is not None and light.get("dimmable") != 0:
                 entities.append(
                     LightingLairdLight(hass=hass, instance=instance, light=light)
                 )
-            else:
+            elif light is not None:
                 entities.append(
                     LightingLairdLightDimmable(
                         hass=hass, instance=instance, light=light
