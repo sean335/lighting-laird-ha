@@ -4,6 +4,7 @@ import json
 
 import time
 import websockets
+from websockets.protocol import State
 
 
 class LightingLairdHub:
@@ -198,7 +199,7 @@ class LightingLairdWebSocketServer:
         self.disableRecv = True
 
     async def get_lamps(self):
-        if self.server is not None and self.server.connected is False:
+        if self.server is not None and self.server.state is not State.OPEN:
             await self.start_server()
 
         if self.server is not None:
@@ -208,7 +209,7 @@ class LightingLairdWebSocketServer:
                 return message
 
     async def get_buttons(self):
-        if self.server is not None and self.server.connected is False:
+        if self.server is not None and self.server.state is not State.OPEN:
             await self.start_server()
 
         if self.server is not None:
@@ -224,7 +225,7 @@ class LightingLairdWebSocketServer:
             await self.server.wait_closed()
 
     async def sendMsg(self, msg):
-        if self.server is not None and self.server.connected is False:
+        if self.server is not None and self.server.state is not State.OPEN:
             await self.start_server()
 
         if self.server is not None:
