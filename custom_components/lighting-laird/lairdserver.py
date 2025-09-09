@@ -198,7 +198,7 @@ class LightingLairdWebSocketServer:
         self.disableRecv = True
 
     async def get_lamps(self):
-        if self.server is not None and self.server.open is False:
+        if self.server is not None and self.server.connected is False:
             await self.start_server()
 
         if self.server is not None:
@@ -208,7 +208,7 @@ class LightingLairdWebSocketServer:
                 return message
 
     async def get_buttons(self):
-        if self.server is not None and self.server.open is False:
+        if self.server is not None and self.server.connected is False:
             await self.start_server()
 
         if self.server is not None:
@@ -224,7 +224,7 @@ class LightingLairdWebSocketServer:
             await self.server.wait_closed()
 
     async def sendMsg(self, msg):
-        if self.server is not None and self.server.open is False:
+        if self.server is not None and self.server.connected is False:
             await self.start_server()
 
         if self.server is not None:
