@@ -5,8 +5,6 @@ import errno
 import json
 import logging
 
-from websockets.exceptions import ConnectionClosedError
-
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_IP_ADDRESS, CONF_TIMEOUT, Platform
 from homeassistant.core import HomeAssistant, callback
@@ -92,42 +90,60 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     async def readWebSockMessages(webSocket):
         while True:
-            try:
-                if api.server.server is not None:
-                    async for message in api.server.server:
-                        print(f"client got {message}")
-                        msgArgs = message.split(" ")
-                        if len(msgArgs) > 0 and msgArgs[0] == "bl":  # brightness level
-                            lampId = int(msgArgs[1])
-                            lampBrightness = int(msgArgs[2])
-                            event_data = {
-                                "lampId": lampId,
-                                "brightness": lampBrightness,
-                            }
-                            hass.bus.async_fire("laird-brightness", event_data)
-                        elif len(msgArgs) > 0 and msgArgs[0] == "bs":  # button state
-                            buttonId = int(msgArgs[1])
-                            buttonState = int(msgArgs[2])
-                            event_data = {"buttonId": buttonId, "state": buttonState}
-                            hass.bus.async_fire("laird-button", event_data)
-                        elif len(msgArgs) > 0 and msgArgs[0] == "lampData":
-                            lampJson = message[8:]
-                            coordinator.data["Lamps"] = json.loads(lampJson)
-                            coordinator.async_set_updated_data(coordinator.data)
-                        elif len(msgArgs) > 0 and msgArgs[0] == "buttonData":
-                            buttonJson = message[10:]
-                            coordinator.data["Buttons"] = json.loads(buttonJson)
-                            coordinator.async_set_updated_data(coordinator.data)
-            except ConnectionClosedError:
-                try:
-                    print("Exception! Reconnecting to Lighting Laird Hub")
-                    await asyncio.wait_for(api.server.start_server(), timeout=5)
-                except ConnectionRefusedError:
-                    await asyncio.sleep(5)
-                    print("connection refused.  wait for retry")
-            except ConnectionRefusedError:
+            if api.server.server is None:
                 await asyncio.sleep(5)
-                print("connection refused.  wait for retry")
+                continue
+            try:
+                async for message in api.server.server:
+                    _LOGGER.debug("client got %s", message)
+                    msgArgs = message.split(" ")
+                    if len(msgArgs) > 0 and msgArgs[0] == "bl":  # brightness level
+                        lampId = int(msgArgs[1])
+                        lampBrightness = int(msgArgs[2])
+                        event_data = {
+                            "lampId": lampId,
+                            "brightness": lampBrightness,
+                        }
+                        hass.bus.async_fire("laird-brightness", event_data)
+                    elif len(msgArgs) > 0 and msgArgs[0] == "bs":  # button state
+                        buttonId = int(msgArgs[1])
+                        buttonState = int(msgArgs[2])
+                        event_data = {"buttonId": buttonId, "state": buttonState}
+                        hass.bus.async_fire("laird-button", event_data)
+                    elif len(msgArgs) > 0 and msgArgs[0] == "lampData":
+                        lampJson = message[8:]
+                        coordinator.data["Lamps"] = json.loads(lampJson)
+                        coordinator.async_set_updated_data(coordinator.data)
+                    elif len(msgArgs) > 0 and msgArgs[0] == "buttonData":
+                        buttonJson = message[10:]
+                        coordinator.data["Buttons"] = json.loads(buttonJson)
+                        coordinator.async_set_updated_data(coordinator.data)
+            except Exception as err:
+                _LOGGER.warning("Lighting Laird WebSocket connection lost: %s", err)
+
+            # Connection ended (closed or error) — attempt reconnection
+            _LOGGER.info("Reconnecting to Lighting Laird Hub...")
+            api.server.server = None
+            while True:
+                try:
+                    await asyncio.wait_for(api.server.start_server(), timeout=5)
+                    _LOGGER.info("Reconnected to Lighting Laird Hub")
+                    break
+                except (
+                    asyncio.TimeoutError,
+                    ConnectionRefusedError,
+                    OSError,
+                ) as err:
+                    _LOGGER.warning(
+                        "Reconnection failed: %s. Retrying in 5 seconds...", err
+                    )
+                    await asyncio.sleep(5)
+                except Exception as err:
+                    _LOGGER.warning(
+                        "Unexpected error during reconnection: %s. Retrying in 5 seconds...",
+                        err,
+                    )
+                    await asyncio.sleep(5)
 
     try:
         await asyncio.wait_for(api.server.start_server(), timeout=5)
@@ -147,7 +163,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     await api.server.disable_recv()
-    asyncio.ensure_future(readWebSockMessages(api.server.server))
+    hass.async_create_task(readWebSockMessages(api.server.server))
 
     return True
 
