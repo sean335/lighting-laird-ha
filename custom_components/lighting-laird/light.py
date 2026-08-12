@@ -24,7 +24,7 @@ SUPPORT_DEMO_HS_WHITE = {ColorMode.HS, ColorMode.WHITE}
 
 
 class LightingLairdLight(LightingLairdEntity, LightEntity):
-    """Representation of Advantage Air Light."""
+    """Representation of a Lighting Laird light."""
 
     _attr_supported_color_modes = {ColorMode.ONOFF}
     _attr_name = None
@@ -32,7 +32,7 @@ class LightingLairdLight(LightingLairdEntity, LightEntity):
     def __init__(
         self, hass: HomeAssistant, instance: LightingLairdData, light: dict[str, Any]
     ) -> None:
-        """Initialize an Advantage Air Light."""
+        """Initialize a Lighting Laird light."""
         super().__init__(instance)
 
         self._id: str = light["lampId"]
@@ -79,14 +79,14 @@ class LightingLairdLight(LightingLairdEntity, LightEntity):
 
 
 class LightingLairdLightDimmable(LightingLairdLight):
-    """Representation of Advantage Air Dimmable Light."""
+    """Representation of a Lighting Laird dimmable light."""
 
-    _attr_supported_color_modes = {ColorMode.ONOFF, ColorMode.BRIGHTNESS}
+    _attr_supported_color_modes = {ColorMode.BRIGHTNESS}
 
     def __init__(
         self, hass: HomeAssistant, instance: LightingLairdData, light: dict[str, Any]
     ) -> None:
-        """Initialize an Advantage Air Dimmable Light."""
+        """Initialize a Lighting Laird dimmable light."""
         super().__init__(hass, instance, light)
         self.async_update_value = self.update_handle_factory(
             instance.api.async_update_value, self._id
