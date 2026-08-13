@@ -26,7 +26,7 @@ SUPPORT_DEMO_HS_WHITE = {ColorMode.HS, ColorMode.WHITE}
 class LightingLairdLight(LightingLairdEntity, LightEntity):
     """Representation of a Lighting Laird light."""
 
-    _attr_supported_color_modes = {ColorMode.ONOFF}
+    _attr_supported_color_modes = {ColorMode.BRIGHTNESS}
     _attr_name = None
 
     def __init__(
