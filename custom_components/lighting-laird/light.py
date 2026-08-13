@@ -26,7 +26,8 @@ SUPPORT_DEMO_HS_WHITE = {ColorMode.HS, ColorMode.WHITE}
 class LightingLairdLight(LightingLairdEntity, LightEntity):
     """Representation of a Lighting Laird light."""
 
-    _attr_supported_color_modes = {ColorMode.BRIGHTNESS}
+    _attr_supported_color_modes = {ColorMode.ONOFF}
+    _attr_color_mode = ColorMode.ONOFF
     _attr_name = None
 
     def __init__(
@@ -82,7 +83,7 @@ class LightingLairdLightDimmable(LightingLairdLight):
     """Representation of a Lighting Laird dimmable light."""
 
     _attr_supported_color_modes = {ColorMode.BRIGHTNESS}
-
+    _attr_color_mode = ColorMode.BRIGHTNESS
     def __init__(
         self, hass: HomeAssistant, instance: LightingLairdData, light: dict[str, Any]
     ) -> None:
